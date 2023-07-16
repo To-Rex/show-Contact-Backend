@@ -169,6 +169,9 @@ func GetUsers(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"users": users})
 	return*/
 	//postman print push data to server and get data from server and print
+	println(c.Request.Header)
+	println(c.Request.Header.Get("Authorization"))
+	println(c.Request.Header.Get("Content-Type"))
 	token := c.GetHeader("Authorization")
 	println(token)
 	token = strings.TrimPrefix(token, "Bearer ")
