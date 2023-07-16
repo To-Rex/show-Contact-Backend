@@ -168,8 +168,11 @@ func GetUsers(c *gin.Context) {
 	//return the users and the status code
 	c.JSON(http.StatusOK, gin.H{"users": users})
 	return*/
+	//postman print push data to server and get data from server and print
 	token := c.GetHeader("Authorization")
+	println(token)
 	token = strings.TrimPrefix(token, "Bearer ")
+	println(token)
 	claims := jwt.MapClaims{}
 	_, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
 		return []byte("secret"), nil
@@ -198,4 +201,27 @@ func GetUsers(c *gin.Context) {
 	}
 	//return the users and the status code
 	c.JSON(http.StatusOK, gin.H{"users": users})
+}
+
+func GetsAllUsers(c *gin.Context) {
+	db := connectDB()
+	rows, err := db.Query("SELECT id, access_token, id_token, ids, phone, email, password, name, photo_url, blocked, role, region, device, created_at, updated_at FROM users")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Error getting the users"})
+		return
+	}
+	defer rows.Close()
+	var users []User
+	for rows.Next() {
+		var user User
+		err := rows.Scan(&user.Id, &user.AccessToken, &user.IdToken, &user.Ids, &user.Phone, &user.Email, &user.Password, &user.Name, &user.PhotoUrl, &user.Blocked, &user.Role, &user.Region, &user.Device, &user.CreatedAt, &user.UpdatedAt)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Error getting the users"})
+			return
+		}
+		users = append(users, user)
+	}
+	//return the users and the status code
+	c.JSON(http.StatusOK, gin.H{"users": users})
+	return
 }
