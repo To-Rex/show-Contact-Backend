@@ -33,7 +33,7 @@ func StartServices() {
 
 	r.POST("/auth/login", auth.Login)
 	r.GET("/auth/getdata", auth.GetUsers)
-	r.OPTIONS("/auth/getdata", auth.GetUsers)
+	//r.OPTIONS("/auth/getdata", auth.GetUsers)
 	r.GET("/auth/getdata1", auth.GetsAllUsers)
 	err := r.Run()
 	if err != nil {
