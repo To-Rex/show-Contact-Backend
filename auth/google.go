@@ -82,7 +82,7 @@ func connectDB() *sql.DB { //Dastur bilan bazaga ulanish
 	return db                              //bazaga ulanishni qaytarish
 }
 
-func Login(c *gin.Context) {
+func LoginGoogle(c *gin.Context) {
 	var user User
 	_ = c.BindJSON(&user)
 	db := connectDB()
@@ -149,9 +149,7 @@ func Login(c *gin.Context) {
 
 func GetUsers(c *gin.Context) {
 	token := c.GetHeader("Authorization")
-	println("shuuuuuuuu ===== " + c.Request.Header.Get("Authorization"))
 	token = strings.TrimPrefix(token, "Bearer ")
-	println(token)
 	claims := jwt.MapClaims{}
 	_, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
 		return []byte("secret"), nil
@@ -167,7 +165,13 @@ func GetUsers(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Error getting the users"})
 		return
 	}
-	defer rows.Close()
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Error getting the users"})
+			return
+		}
+	}(rows)
 	var users []User
 	for rows.Next() {
 		var user User
@@ -189,7 +193,13 @@ func GetsAllUsers(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Error getting the users"})
 		return
 	}
-	defer rows.Close()
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Error getting the users"})
+			return
+		}
+	}(rows)
 	var users []User
 	for rows.Next() {
 		var user User
@@ -203,4 +213,13 @@ func GetsAllUsers(c *gin.Context) {
 	//return the users and the status code
 	c.JSON(http.StatusOK, gin.H{"users": users})
 	return
+}
+
+func AddFaceTerminalPhota() {
+	//url: = "http://192.168.0.163/ISAPI/Intelligent/FDLib/FDSetUp?format=json"
+	//post method face terminal add photo
+	//Authorization Digest Auth Username: "admin" Password: "lionprint2023"
+	//Body from-data Key: FaceDataRecord, value:["faceLibType"."blackFD""FDID"."1""FPID":"10"}
+	//Body from-data Key: img, value: "C:\Users\lion\Desktop\lion.jpg"
+
 }

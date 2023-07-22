@@ -6,6 +6,7 @@ import (
 	_ "github.com/lib/pq"
 	"net/http"
 	"show_contact/auth"
+	"show_contact/contacts"
 )
 
 type CORSRouterDecorator struct {
@@ -31,10 +32,13 @@ func StartServices() {
 	r := gin.Default()
 	r.Use(CORSMiddleware())
 
-	r.POST("/auth/login", auth.Login)
+	r.POST("/auth/login", auth.LoginGoogle)
 	r.GET("/auth/getdata", auth.GetUsers)
 	//r.OPTIONS("/auth/getdata", auth.GetUsers)
 	r.GET("/auth/getdata1", auth.GetsAllUsers)
+	r.POST("/data/contact/import", ImPortContact)
+	r.POST("/data/contact/export", ExportContact)
+	r.POST("/contact", contacts.AddContact)
 	err := r.Run()
 	if err != nil {
 		return
