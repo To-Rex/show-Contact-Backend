@@ -32,13 +32,14 @@ func StartServices() {
 	r := gin.Default()
 	r.Use(CORSMiddleware())
 
-	r.POST("/auth/login", auth.LoginGoogle)
+	r.POST("/auth/login/google", auth.LoginGoogle)
 	r.GET("/auth/getdata", auth.GetUsers)
-	//r.OPTIONS("/auth/getdata", auth.GetUsers)
 	r.GET("/auth/getdata1", auth.GetsAllUsers)
 	r.POST("/data/contact/import", ImPortContact)
 	r.POST("/data/contact/export", ExportContact)
 	r.POST("/contact", contacts.AddContact)
+	//search contact
+	r.GET("/contact/search", contacts.SearchContact)
 	err := r.Run()
 	if err != nil {
 		return

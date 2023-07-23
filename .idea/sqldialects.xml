@@ -3,6 +3,7 @@
   <component name="SqlDialectMappings">
     <file url="file://$PROJECT_DIR$/auth/google.go" dialect="GenericSQL" />
     <file url="file://$PROJECT_DIR$/contacts/addContact.go" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/contacts/contacts.go" dialect="GenericSQL" />
     <file url="file://$PROJECT_DIR$/services/import.go" dialect="GenericSQL" />
   </component>
 </project>
