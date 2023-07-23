@@ -174,7 +174,6 @@ func ExportContact(c *gin.Context) {
 	f.SetCellValue("Sheet1", "O1", "Phonetic Organization Name")
 	f.SetCellValue("Sheet1", "P1", "Postal Addresses")
 	f.SetCellValue("Sheet1", "Q1", "URL Addresses")
-	//contatcsList to excel file end
 	//save the file to the server
 	errs := f.SaveAs("./files/IMcontacts.xlsx")
 	if errs != nil {

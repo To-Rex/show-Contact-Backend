@@ -9,28 +9,10 @@ import (
 	_ "github.com/lib/pq"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
+	"show_contact/config"
+	"show_contact/models"
 	"strings"
-	"time"
 )
-
-type User struct {
-	Id          int    `json:"id"`
-	AccessToken string `json:"access_token"`
-	IdToken     string `json:"id_token"`
-	Ids         string `json:"ids"`
-	Phone       string `json:"phone"`
-	Email       string `json:"email"`
-	Password    string `json:"password"`
-	Name        string `json:"name"`
-	PhotoUrl    string `json:"photo_url"`
-	Blocked     bool   `json:"blocked"`
-	Role        string `json:"role"`
-	Region      string `json:"region"`
-	Device      string `json:"device"`
-	CreatedAt   string `json:"created_at"`
-	UpdatedAt   string `json:"updated_at"`
-	Token       string `json:"token"`
-}
 
 const (
 	host     = "containers-us-west-73.railway.app" //host
@@ -46,25 +28,6 @@ func passwordHash(password string) string {
 		fmt.Println(err)
 	}
 	return string(hash)
-}
-
-func checkPasswordHash(password, hash string) bool { //parolni tekshirish
-	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password)) //parolni tekshirish
-	return err == nil                                                    //agar xato bo'lmasa true qaytaradi
-}
-
-func generateToken(email string, password string, roles string) (string, error) { //token yaratish
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{ //token yaratish
-		"email":      email,
-		"password":   password,
-		"created_at": time.Now(),
-		"roles":      roles,
-	})
-	tokenString, err := token.SignedString([]byte("secret")) //tokenni shifrlash
-	if err != nil {
-		return "", err
-	}
-	return tokenString, nil
 }
 
 func connectDB() *sql.DB { //Dastur bilan bazaga ulanish
@@ -83,7 +46,7 @@ func connectDB() *sql.DB { //Dastur bilan bazaga ulanish
 }
 
 func LoginGoogle(c *gin.Context) {
-	var user User
+	var user models.User
 	_ = c.BindJSON(&user)
 	db := connectDB()
 	//if users table does not exist, create it and insert the user
@@ -112,7 +75,9 @@ func LoginGoogle(c *gin.Context) {
 		    "created_at":"2023-07-15 12:29:40",
 		    "updated_at":"2023-07-15 12:29:40"
 		}*/
-		user.Token, _ = generateToken(user.Email, user.Password, user.Role)
+		//user.Token, _ = generateToken(user.Email, user.Password, user.Role)
+		//generateToken function ../config/config.go
+		user.Token, _ = config.GenerateToken(user.Email, user.Password, user.Role)
 
 		//_, err := db.Exec("INSERT INTO users (access_token, id_token, ids, phone, email, name, photo_url, status, blocked, role, region, device, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, false, $9, $10, $11, $12, $13)", user.AccessToken, user.IdToken, user.Ids, user.Phone, user.Email, user.Name, user.PhotoUrl, user.Status, user.Role, user.Region, user.Device, user.CreatedAt, user.UpdatedAt) //insert the user
 		_, err := db.Exec("INSERT INTO users (access_token, id_token, ids, phone, email, password, name, photo_url, blocked, role, region, device, created_at, updated_at, token) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, false, $9, $10, $11, $12, $13, $14)", user.AccessToken, user.IdToken, user.Ids, user.Phone, user.Email, passwordHash(user.Email), user.Name, user.PhotoUrl, user.Role, user.Region, user.Device, user.CreatedAt, user.UpdatedAt, user.Token) //insert the user
@@ -135,7 +100,7 @@ func LoginGoogle(c *gin.Context) {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "User is blocked"})
 			return
 		}
-		user.Token, _ = generateToken(user.Email, user.Password, user.Role)
+		user.Token, _ = config.GenerateToken(user.Email, user.Password, user.Role)
 		_, err := db.Exec("UPDATE users SET access_token=$1, id_token=$2, ids=$3, email=$4, name=$5, photo_url=$6, region=$7, device=$8, updated_at=$9, token=$10 WHERE id=$11", user.AccessToken, user.IdToken, user.Ids, user.Email, user.Name, user.PhotoUrl, user.Region, user.Device, user.UpdatedAt, user.Token, id) //update the user
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Error updating the user"})
@@ -172,9 +137,9 @@ func GetUsers(c *gin.Context) {
 			return
 		}
 	}(rows)
-	var users []User
+	var users []models.User
 	for rows.Next() {
-		var user User
+		var user models.User
 		err := rows.Scan(&user.Id, &user.AccessToken, &user.IdToken, &user.Ids, &user.Phone, &user.Email, &user.Password, &user.Name, &user.PhotoUrl, &user.Blocked, &user.Role, &user.Region, &user.Device, &user.CreatedAt, &user.UpdatedAt)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Error getting the users"})
@@ -200,9 +165,9 @@ func GetsAllUsers(c *gin.Context) {
 			return
 		}
 	}(rows)
-	var users []User
+	var users []models.User
 	for rows.Next() {
-		var user User
+		var user models.User
 		err := rows.Scan(&user.Id, &user.AccessToken, &user.IdToken, &user.Ids, &user.Phone, &user.Email, &user.Password, &user.Name, &user.PhotoUrl, &user.Blocked, &user.Role, &user.Region, &user.Device, &user.CreatedAt, &user.UpdatedAt)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Error getting the users"})
@@ -213,13 +178,4 @@ func GetsAllUsers(c *gin.Context) {
 	//return the users and the status code
 	c.JSON(http.StatusOK, gin.H{"users": users})
 	return
-}
-
-func AddFaceTerminalPhota() {
-	//url: = "http://192.168.0.163/ISAPI/Intelligent/FDLib/FDSetUp?format=json"
-	//post method face terminal add photo
-	//Authorization Digest Auth Username: "admin" Password: "lionprint2023"
-	//Body from-data Key: FaceDataRecord, value:["faceLibType"."blackFD""FDID"."1""FPID":"10"}
-	//Body from-data Key: img, value: "C:\Users\lion\Desktop\lion.jpg"
-
 }

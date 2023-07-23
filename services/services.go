@@ -19,31 +19,10 @@ func (c *CORSRouterDecorator) ServeHTTP(rw http.ResponseWriter, req *http.Reques
 		rw.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 		rw.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	}
-
 	if req.Method == "OPTIONS" {
 		return
 	}
-
 	c.R.ServeHTTP(rw, req)
-
-}
-
-func StartServices() {
-	r := gin.Default()
-	r.Use(CORSMiddleware())
-
-	r.POST("/auth/login/google", auth.LoginGoogle)
-	r.GET("/auth/getdata", auth.GetUsers)
-	r.GET("/auth/getdata1", auth.GetsAllUsers)
-	r.POST("/data/contact/import", ImPortContact)
-	r.POST("/data/contact/export", ExportContact)
-	r.POST("/contact", contacts.AddContact)
-	//search contact
-	r.GET("/contact/search", contacts.SearchContact)
-	err := r.Run()
-	if err != nil {
-		return
-	}
 }
 
 func CORSMiddleware() gin.HandlerFunc {
@@ -58,5 +37,23 @@ func CORSMiddleware() gin.HandlerFunc {
 			return
 		}
 		c.Next()
+	}
+}
+
+func StartServices() {
+	r := gin.Default()
+	r.Use(CORSMiddleware())
+	r.POST("/auth/login/google", auth.LoginGoogle)
+	r.POST("/auth/login", auth.Login)
+	r.GET("/auth/getdata", auth.GetUsers)
+	r.GET("/auth/getdata1", auth.GetsAllUsers)
+	r.POST("/data/contact/import", ImPortContact)
+	r.POST("/data/contact/export", ExportContact)
+	r.POST("/contact", contacts.AddContact)
+	//search contact
+	r.GET("/contact/search", contacts.SearchContact)
+	err := r.Run()
+	if err != nil {
+		return
 	}
 }
