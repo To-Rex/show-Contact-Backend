@@ -52,6 +52,7 @@ func StartServices() {
 	r.POST("/contact", contacts.AddContact)
 	//search contact
 	r.GET("/contact/search", contacts.SearchContact)
+	r.GET("/auth/getUser", auth.GetUser)
 	err := r.Run()
 	if err != nil {
 		return

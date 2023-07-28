@@ -15,7 +15,7 @@ func Login(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Error getting the users  " + err.Error()})
 		return
 	}
-	db := connectDB()
+	db := config.ConnectDB()
 	//chesk user.email or user.phone and user.password if db in users table have this user return user.token
 	//err = db.QueryRow("SELECT phone, email, password, FROM users WHERE email = $1 OR phone = $1 AND password = $2", user.Email, user.Password).Scan(&user.Phone, &user.Email, &user.Password)
 	err = db.QueryRow("SELECT id, access_token, id_token, ids, phone, email, password, name, photo_url, blocked, role, region, device, created_at, updated_at FROM users WHERE email = $1 OR phone = $1 AND password = $2", user.Email, user.Password).Scan(&user.Id, &user.AccessToken, &user.IdToken, &user.Ids, &user.Phone, &user.Email, &user.Password, &user.Name, &user.PhotoUrl, &user.Blocked, &user.Role, &user.Region, &user.Device, &user.CreatedAt, &user.UpdatedAt)

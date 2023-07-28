@@ -20,20 +20,29 @@ func ConnectDB() *sql.DB { //Dastur bilan bazaga ulanish
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+"password=%s dbname=%s sslmode=disable", host, port, user, password, dbname) //bazaga ulanish uchun ma'lumotlar
 	db, err := sql.Open("postgres", psqlInfo)                                                                                       //bazaga ulanish
 	if err != nil {
-		fmt.Println("Error: Could not connect to the Postgres database")
+		//fmt.Println("Error: Could not connect to the Postgres database")
+		return nil
 	}
-	err = db.Ping() //bazaga ulanishni tekshirish
+	err = db.Ping()
 	if err != nil {
 		fmt.Println("Error: Could not establish a connection with the database")
 		//panic(err)
+		return nil
 	}
-	fmt.Println("Successfully connected!") //bazaga ulanishni tekshirish
-	return db                              //bazaga ulanishni qaytarish
+	return db
 }
 
 func checkPasswordHash(password, hash string) bool { //parolni tekshirish
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password)) //parolni tekshirish
 	return err == nil                                                    //agar xato bo'lmasa true qaytaradi
+}
+
+func PasswordHash(password string) string {
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), 10)
+	if err != nil {
+		fmt.Println(err)
+	}
+	return string(hash)
 }
 
 func GenerateToken(email string, name string, roles string) (string, error) { //token yaratish

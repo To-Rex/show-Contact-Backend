@@ -36,6 +36,7 @@ func SearchContact(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"contacts": contacts})
 }
+
 func searchContacts(db *sql.DB, searchTerm string) ([]models.Contact, error) {
 	rows, err := db.Query("SELECT display_name, given_name, middle_name, prefix, suffix, family_name, company, job_title, emails, phones, postal_addresses, avatar, birthday, android_account_type, android_account_type_raw, android_account_name FROM contacts WHERE display_name LIKE $1 OR given_name LIKE $1 OR middle_name LIKE $1 OR prefix LIKE $1 OR suffix LIKE $1 OR family_name LIKE $1 OR company LIKE $1 OR job_title LIKE $1 OR emails LIKE $1 OR phones LIKE $1 OR postal_addresses LIKE $1 OR android_account_type LIKE $1 OR android_account_type_raw LIKE $1 OR android_account_name LIKE $1", "%"+searchTerm+"%")
 	if err != nil {
