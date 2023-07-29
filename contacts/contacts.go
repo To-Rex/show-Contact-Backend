@@ -27,7 +27,7 @@ func SearchContact(c *gin.Context) {
 		return
 	}
 	db := config.ConnectDB()
-	searchTerm := c.Query("searchTerm")
+	searchTerm := c.Query("search")
 	println(searchTerm)
 	contacts, err := searchContacts(db, searchTerm)
 	if err != nil {
